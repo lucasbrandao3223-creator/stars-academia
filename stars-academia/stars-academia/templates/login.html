@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Entrar{% endblock %}
+
+{% block conteudo %}
+<div class="auth">
+  <div class="auth__cartao">
+    <p class="selo">{{ academia.nome }}</p>
+    <h1>Entrar</h1>
+    <p class="texto-suave">Alunos, personais e administração usam o mesmo acesso.</p>
+    <form method="post" class="formulario">
+      {% if proximo %}<input type="hidden" name="proximo" value="{{ proximo }}">{% endif %}
+      <label class="campo"><span>E-mail</span><input type="email" name="email" value="{{ email }}" required autofocus autocomplete="email"></label>
+      <label class="campo"><span>Senha</span><input type="password" name="senha" required autocomplete="current-password"></label>
+      <button class="botao botao--volt botao--bloco" type="submit">Entrar</button>
+    </form>
+    <p class="texto-centro">Ainda não é aluno? <a href="{{ url_for('cadastro', proximo=proximo) }}">Crie sua conta</a></p>
+    <details class="contas-teste">
+      <summary>Contas de demonstração</summary>
+      <p>Senha de todas: <code>123456</code></p>
+      <ul>
+        <li><strong>Aluno:</strong> aluno@teste.com</li>
+        <li><strong>Personal:</strong> personal@stars.com</li>
+        <li><strong>Administrador:</strong> admin@stars.com</li>
+      </ul>
+    </details>
+  </div>
+</div>
+{% endblock %}

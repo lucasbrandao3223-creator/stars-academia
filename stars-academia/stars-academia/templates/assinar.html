@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block titulo %}Assinar plano {{ plano.nome }}{% endblock %}
+
+{% block conteudo %}
+<div class="container assinar">
+  <section>
+    <p class="selo">Matrícula</p>
+    <h1>Plano {{ plano.nome }}</h1>
+    <p class="texto-suave">{{ plano.descricao }}</p>
+
+    {% set vigente = situacao.vigente %}
+    {% if situacao.agendada %}
+      <p class="aviso-inline">Você já tem uma renovação agendada ({{ situacao.agendada.plano_nome }}, a partir de {{ situacao.agendada.data_inicio|data_br }}).</p>
+    {% elif vigente and not situacao.pode_contratar %}
+      <p class="aviso-inline">Seu plano {{ vigente.plano_nome }} está ativo até {{ vigente.data_fim|data_br }}. A renovação fica liberada nos últimos dias do plano.</p>
+    {% elif vigente %}
+      <p class="aviso-inline aviso-inline--info">Seu plano atual vence em {{ vigente.data_fim|data_br }}. O novo plano começa no dia seguinte, sem perder nenhum dia.</p>
+    {% endif %}
+
+    {% if situacao.pode_contratar %}
+    <form method="post" id="form-assinar" style="margin-top: 26px">
+      <fieldset class="grupo">
+        <legend>Forma de pagamento</legend>
+        <div class="formas">
+          <div class="forma">
+            <input type="radio" name="forma_pagamento" id="fp-pix" value="pix" required checked>
+            <label for="fp-pix"><svg viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9z"/></svg>Pix</label>
+          </div>
+          <div class="forma">
+            <input type="radio" name="forma_pagamento" id="fp-cartao" value="cartao">
+            <label for="fp-cartao"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Cartão</label>
+          </div>
+          <div class="forma">
+            <input type="radio" name="forma_pagamento" id="fp-dinheiro" value="dinheiro">
+            <label for="fp-dinheiro"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>Na recepção</label>
+          </div>
+        </div>
+        <p class="texto-suave" style="margin: 14px 0 0">O pagamento é feito na recepção da academia ou pelo Pix informado lá. O sistema registra a forma escolhida.</p>
+      </fieldset>
+    </form>
+    {% endif %}
+  </section>
+
+  <aside class="painel resumo">
+    <h2>Resumo</h2>
+    <dl>
+      <div><dt>Plano</dt><dd>{{ plano.nome }}</dd></div>
+      <div><dt>Duração</dt><dd>{{ plano.duracao_texto }}</dd></div>
+      <div><dt>Mensalidade</dt><dd>{{ plano.preco_formatado }}</dd></div>
+      <div><dt>Início</dt><dd>{% if vigente and situacao.pode_contratar %}Após {{ vigente.data_fim|data_br }}{% else %}Hoje{% endif %}</dd></div>
+      <div class="resumo__total"><dt>Total</dt><dd>{{ plano.total_formatado }}</dd></div>
+    </dl>
+    {% if situacao.pode_contratar %}
+      <button type="submit" form="form-assinar" class="botao botao--volt botao--bloco">Confirmar matrícula</button>
+    {% else %}
+      <a href="{{ url_for('aluno_painel') }}" class="botao botao--contorno botao--bloco">Voltar para minha área</a>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

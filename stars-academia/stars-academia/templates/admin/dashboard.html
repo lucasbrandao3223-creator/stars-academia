@@ -1,0 +1,97 @@
+{% extends "equipe/_layout.html" %}
+{% block titulo %}Painel{% endblock %}
+
+{% block area %}
+<div class="admin__cabecalho">
+  <div><p class="selo">{{ hoje|dia_extenso }}</p><h1>Visão geral</h1></div>
+  <a href="{{ url_for('equipe_alunos') }}" class="botao botao--volt">Ver alunos</a>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><span>Alunos ativos</span><strong>{{ stats.alunos_ativos }}</strong><small>de {{ stats.total_alunos }} cadastrados</small></div>
+  <div class="kpi"><span>Check-ins hoje</span><strong>{{ stats.checkins_hoje }}</strong><small>entradas na academia</small></div>
+  <div class="kpi {% if stats.vencendo %}kpi--alerta{% endif %}"><span>Vencem em 7 dias</span><strong>{{ stats.vencendo }}</strong>
+    {% if stats.vencendo %}<a href="{{ url_for('admin_matriculas', situacao='vencendo') }}">Avisar alunos →</a>{% else %}<small>nenhuma renovação pendente</small>{% endif %}</div>
+  <div class="kpi"><span>Faturamento do mês</span><strong>{{ stats.faturamento_mes|moeda }}</strong><small>{{ stats.matriculas_mes }} matrícula(s) · ticket {{ stats.ticket_medio|moeda }}</small></div>
+</div>
+
+<div class="admin-grade">
+  <div class="coluna">
+    <section class="painel">
+      <div class="painel__topo"><h2>Check-ins · 14 dias</h2></div>
+      <div class="grafico-barras" style="--colunas: 14">
+        {% for d in por_dia %}
+          <div class="grafico-barras__item" title="{{ d.data|data_br }}: {{ d.total }} check-ins">
+            <span class="grafico-barras__valor">{{ d.total }}</span>
+            <span class="grafico-barras__barra {% if loop.last %}grafico-barras__barra--laranja{% endif %}" style="--altura: {{ (d.total / maiores.dia * 100)|round }}%"></span>
+            <span class="grafico-barras__rotulo">{{ d.rotulo }}<b>{{ d.dia }}</b></span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="painel">
+      <div class="painel__topo"><h2>Horários de pico</h2><span class="texto-suave">últimos 30 dias</span></div>
+      {% if por_hora %}
+      <div class="grafico-barras grafico-barras--pequeno" style="--colunas: {{ por_hora|length }}">
+        {% for h in por_hora %}
+          <div class="grafico-barras__item" title="{{ h.hora }}h: {{ h.total }} check-ins">
+            <span class="grafico-barras__valor">{{ h.total }}</span>
+            <span class="grafico-barras__barra" style="--altura: {{ (h.total / maiores.hora * 100)|round }}%"></span>
+            <span class="grafico-barras__rotulo">{{ h.hora }}h</span>
+          </div>
+        {% endfor %}
+      </div>
+      {% else %}<p class="texto-suave">Sem check-ins no período.</p>{% endif %}
+    </section>
+
+    <section class="painel">
+      <div class="painel__topo"><h2>Vencendo em breve</h2><a href="{{ url_for('admin_matriculas', situacao='vencendo') }}">ver todas</a></div>
+      <ul class="lista-simples">
+        {% for m in vencendo %}
+          <li>
+            <div><a href="{{ url_for('equipe_ficha', aluno_id=m.aluno_id) }}">{{ m.aluno_nome }}</a><small>{{ m.plano_nome }} · vence {{ m.data_fim|data_br }}{% if m.aluno_telefone %} · {{ m.aluno_telefone_formatado }}{% endif %}</small></div>
+            <span class="badge badge--vencendo">{{ m.dias_restantes(hoje) }}d</span>
+          </li>
+        {% else %}<li class="texto-suave">Nenhuma matrícula vencendo nos próximos dias.</li>{% endfor %}
+      </ul>
+    </section>
+  </div>
+
+  <div class="coluna">
+    <section class="painel">
+      <div class="painel__topo"><h2>Entradas de hoje</h2><span class="contador">{{ stats.checkins_hoje }}</span></div>
+      <ul class="lista-simples">
+        {% for c in checkins_hoje %}
+          <li><a href="{{ url_for('equipe_ficha', aluno_id=c.aluno_id) }}">{{ c.aluno_nome }}</a><span class="texto-suave">{{ c.hora_texto }}</span></li>
+        {% else %}<li class="texto-suave">Ninguém fez check-in ainda hoje.</li>{% endfor %}
+      </ul>
+    </section>
+
+    <section class="painel">
+      <div class="painel__topo"><h2>Faturamento</h2><span class="texto-suave">por mês de início</span></div>
+      {% if faturamento %}
+      <div class="grafico-barras grafico-barras--pequeno" style="--colunas: {{ faturamento|length }}">
+        {% for f in faturamento %}
+          <div class="grafico-barras__item" title="{{ f.matriculas }} matrícula(s)">
+            <span class="grafico-barras__valor">{{ (f.faturamento / 1000)|round(1)|string|replace('.', ',') }}k</span>
+            <span class="grafico-barras__barra" style="--altura: {{ (f.faturamento / maiores.fat * 100)|round }}%"></span>
+            <span class="grafico-barras__rotulo">{{ f.rotulo }}</span>
+          </div>
+        {% endfor %}
+      </div>
+      {% else %}<p class="texto-suave">Sem matrículas ainda.</p>{% endif %}
+    </section>
+
+    <section class="painel">
+      <div class="painel__topo"><h2>Alunos por plano</h2></div>
+      <ul class="ranking">
+        {% for p in planos %}
+          <li><div class="ranking__topo"><span>{{ p.nome }}</span><strong>{{ p.total }}</strong></div>
+            <div class="ranking__barra"><span style="width: {{ (p.total / maiores.plano * 100)|round }}%"></span></div></li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}

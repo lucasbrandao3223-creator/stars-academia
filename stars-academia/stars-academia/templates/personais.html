@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block titulo %}Personal trainers{% endblock %}
+{% set cores = ["linear-gradient(135deg,#FFE27A,#FF9F1C)", "linear-gradient(135deg,#9BE7FF,#3D8BFF)", "linear-gradient(135deg,#FFB3C7,#FF5C8A)", "linear-gradient(135deg,#B9F6CA,#2FBF71)", "linear-gradient(135deg,#D6C2FF,#8A5CFF)", "linear-gradient(135deg,#FFD0A8,#FF6B2C)", "linear-gradient(135deg,#C8F2EE,#14B8A6)", "linear-gradient(135deg,#F5F5F5,#9AA3AF)"] %}
+
+{% block conteudo %}
+<section class="hero" style="padding: 56px 0 44px">
+  <div class="estrelas-fundo" data-estrelas="30" aria-hidden="true"></div>
+  <div class="container" style="position: relative">
+    <p class="selo">Equipe {{ academia.nome }}</p>
+    <h1 style="font-size: clamp(2.6rem, 6vw, 4.6rem)">Escolha quem vai<em>fazer você brilhar.</em></h1>
+    <p class="hero__sub">{{ personais|length }} personal trainers com CREF, cada um com uma especialidade. Toque no card para ver o perfil completo{% if usuario and not usuario.faz_parte_da_equipe %} e escolher o seu{% endif %}.</p>
+    {% if usuario and not usuario.faz_parte_da_equipe and usuario.personal_nome %}
+      <p class="proximo-treino" style="display: inline-flex"><span>Seu personal hoje</span><strong>{{ usuario.personal_nome }}</strong></p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="secao" style="padding-top: 40px">
+  <div class="container">
+    <div class="filtro-chips" role="group" aria-label="Filtrar por especialidade">
+      <button type="button" data-filtro="" aria-pressed="true">Todos ({{ personais|length }})</button>
+      {% for t in tags %}<button type="button" data-filtro="{{ t|lower }}" aria-pressed="false">{{ t }}</button>{% endfor %}
+    </div>
+
+    <div class="equipe" id="lista-personais">
+      {% for p in personais %}
+        <button type="button" class="personal-card painel" id="personal-{{ p.id }}" data-tags="{{ p.tags|join('|')|lower }}"
+                data-modal="modal-{{ p.id }}">
+          <div class="personal-card__topo">
+            <span class="avatar avatar--personal" style="--cor-avatar: {{ cores[loop.index0 % cores|length] }}">{{ p.iniciais }}</span>
+            <div>
+              <h3>{{ p.nome }}</h3>
+              <div class="tags-personal">{% for t in p.tags %}<span class="chip chip--volt">{{ t }}</span>{% endfor %}</div>
+            </div>
+          </div>
+          <p>{{ p.bio|truncate(120) }}</p>
+          <div class="personal-card__numeros">
+            <div><b>{{ p.anos_experiencia or "—" }}</b>anos</div>
+            <div><b>{{ p.total_alunos }}</b>alunos</div>
+            <div><b>{{ p.total_treinos }}</b>treinos ativos</div>
+          </div>
+          <span class="personal-card__ver">Ver perfil →</span>
+        </button>
+
+        <dialog class="modal" id="modal-{{ p.id }}" aria-labelledby="titulo-{{ p.id }}">
+          <div class="modal__topo">
+            <span class="avatar avatar--personal avatar--grande" style="--cor-avatar: {{ cores[loop.index0 % cores|length] }}">{{ p.iniciais }}</span>
+            <div>
+              <h2 id="titulo-{{ p.id }}">{{ p.nome }}</h2>
+              <span class="personal-card__esp">{{ p.especialidade }}</span>
+              <small class="texto-suave" style="display: block; margin-top: 4px">CREF {{ p.cref }}</small>
+            </div>
+            <button type="button" class="modal__fechar" data-fechar aria-label="Fechar">×</button>
+          </div>
+          <div class="modal__corpo">
+            <p>{{ p.bio }}</p>
+            <div class="modal__numeros">
+              <div class="numero numero--volt"><strong>{{ p.anos_experiencia or "—" }}</strong><span>anos de experiência</span></div>
+              <div class="numero"><strong>{{ p.total_alunos }}</strong><span>alunos acompanhados</span></div>
+              <div class="numero"><strong>{{ p.total_treinos }}</strong><span>fichas ativas</span></div>
+            </div>
+            <div class="tags-personal" style="margin-bottom: 20px">{% for t in p.tags %}<span class="chip chip--volt">{{ t }}</span>{% endfor %}</div>
+            {% if usuario and not usuario.faz_parte_da_equipe %}
+              {% if usuario.personal_id == p.id %}
+                <p class="feito-hoje" style="margin: 0">✓ {{ p.primeiro_nome }} já é o seu personal.</p>
+              {% else %}
+                <form method="post" action="{{ url_for('escolher_personal', personal_id=p.id) }}">
+                  <button class="botao botao--volt botao--bloco botao--grande" type="submit">⭐ Treinar com {{ p.primeiro_nome }}</button>
+                </form>
+              {% endif %}
+            {% elif not usuario %}
+              <a class="botao botao--volt botao--bloco botao--grande" href="{{ url_for('cadastro', proximo=url_for('personais')) }}">Criar conta e treinar com {{ p.primeiro_nome }}</a>
+            {% endif %}
+          </div>
+        </dialog>
+      {% endfor %}
+    </div>
+    <p class="vazio" id="sem-resultado" hidden>Nenhum personal com essa especialidade.</p>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', filename='js/site.js') }}"></script>{% endblock %}

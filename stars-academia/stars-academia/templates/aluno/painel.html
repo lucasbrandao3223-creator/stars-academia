@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% block titulo %}Minha área{% endblock %}
+
+{% block conteudo %}
+<div class="container" id="area-aluno" data-hoje="{{ hoje.isoformat() }}" data-url-frequencia="{{ url_for('aluno_frequencia') }}" data-url-meta="{{ url_for('aluno_meta') }}">
+  <div class="cabecalho-pagina">
+    <div>
+      <p class="selo">Minha área</p>
+      <h1>Fala, {{ usuario.primeiro_nome }}! ⭐</h1>
+      <div class="botoes" style="margin-top: 8px">
+        {% if usuario.objetivo %}<span class="chip chip--volt">Objetivo: {{ usuario.objetivo }}</span>{% endif %}
+        {% if usuario.idade() %}<span class="chip">{{ usuario.idade() }} anos</span>{% endif %}
+        <span class="chip">{{ totais.treinos }} treinos concluídos</span>
+        <span class="chip">{{ (totais.minutos / 60)|round(1)|string|replace('.', ',') }} h treinando</span>
+      </div>
+    </div>
+    {% if proximo %}
+      <button type="button" class="proximo-treino" data-ir-treino="{{ proximo.id }}" style="cursor: pointer; font: inherit; color: inherit; text-align: left">
+        <div><span>{% if proximo.feito_hoje %}Feito hoje{% else %}Treino sugerido para hoje{% endif %}</span><strong>{{ proximo.nome }}</strong></div>
+        <span class="botao botao--volt botao--sm">Abrir</span>
+      </button>
+    {% endif %}
+  </div>
+
+  <div class="grade-aluno">
+    {# ---------------- plano ---------------- #}
+    <section class="painel" aria-labelledby="t-plano">
+      {% set vigente = matricula.vigente %}
+      <p class="selo" id="t-plano">Meu plano</p>
+      {% if vigente %}
+        {% set dias = vigente.dias_restantes(hoje) %}
+        <span class="badge badge--ativa">Ativo</span>
+        <div class="matricula-card__plano">{{ vigente.plano_nome }}</div>
+        <span class="texto-suave">Válido até {{ vigente.data_fim|data_br }}</span>
+        <div class="barra-progresso {% if dias <= 7 %}barra-progresso--alerta{% endif %}"><span style="width: {{ vigente.progresso(hoje) }}%"></span></div>
+        <div class="linha-info"><span>{{ vigente.data_inicio|data_br }}</span><span>{% if dias == 0 %}vence hoje{% else %}{{ dias }} dia(s) restante(s){% endif %}</span></div>
+        {% if matricula.agendada %}
+          <p class="aviso-inline aviso-inline--info" style="margin-top: 16px">Renovação já paga: {{ matricula.agendada.plano_nome }} a partir de {{ matricula.agendada.data_inicio|data_br }}.</p>
+        {% elif matricula.pode_contratar %}
+          <p class="aviso-inline" style="margin: 16px 0">Seu plano está acabando. Renove para não perder nenhum dia.</p>
+          <a href="{{ url_for('index') }}#planos" class="botao botao--volt botao--bloco">Renovar plano</a>
+        {% endif %}
+      {% elif matricula.agendada %}
+        <span class="badge badge--agendada">Agendado</span>
+        <div class="matricula-card__plano">{{ matricula.agendada.plano_nome }}</div>
+        <p class="texto-suave">Começa em {{ matricula.agendada.data_inicio|data_br }}.</p>
+      {% else %}
+        <span class="badge badge--vencida">Sem plano ativo</span>
+        <div class="matricula-card__plano">Bora voltar?</div>
+        {% if matricula.historico %}<p class="texto-suave">Seu último plano ({{ matricula.historico[0].plano_nome }}) terminou em {{ matricula.historico[0].data_fim|data_br }}.</p>
+        {% else %}<p class="texto-suave">Escolha um plano para liberar o check-in.</p>{% endif %}
+        <a href="{{ url_for('index') }}#planos" class="botao botao--volt botao--bloco">Escolher plano</a>
+      {% endif %}
+    </section>
+
+    {# ---------------- check-in ---------------- #}
+    <section class="painel checkin-card" aria-labelledby="t-checkin">
+      <p class="selo" id="t-checkin">Check-in de hoje</p>
+      {% if checkin.pode %}
+        <form method="post" action="{{ url_for('aluno_checkin') }}">
+          <button type="submit" class="checkin-botao"><span><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Check-in</span></button>
+        </form>
+      {% elif checkin.feito %}
+        <div class="checkin-feito"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+      {% else %}
+        <div class="checkin-bloqueado"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+      {% endif %}
+      <p>{{ checkin.mensagem }}</p>
+    </section>
+
+    {# ---------------- meta da semana ---------------- #}
+    <section class="painel" aria-labelledby="t-meta">
+      <p class="selo" id="t-meta">Meta da semana</p>
+      <div class="meta-anel">
+        <svg viewBox="0 0 120 120">
+          <defs><linearGradient id="gradMeta" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF1A8"/><stop offset=".5" stop-color="#FFC83D"/><stop offset="1" stop-color="#FF8A00"/></linearGradient></defs>
+          <circle class="fundo" cx="60" cy="60" r="50"/>
+          <circle class="valor" id="meta-anel" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+        </svg>
+        <div class="meta-anel__texto"><div><b id="meta-feitos">{{ frequencia.feitos_semana }}</b><span>de <span id="meta-valor">{{ frequencia.meta_semanal }}</span> treinos</span></div></div>
+      </div>
+      <div class="dias-semana" id="dias-semana">
+        {% for d in frequencia.semana_atual %}<span class="{% if d.treinou %}on{% endif %} {% if d.hoje %}hoje{% endif %}" title="{{ d.data }}">{{ d.rotulo }}</span>{% endfor %}
+      </div>
+      <p class="texto-centro texto-suave" id="meta-frase" style="margin: 0 0 12px"></p>
+      <div class="meta-controle">
+        <button type="button" class="botao-icone" data-meta="-1" aria-label="Diminuir meta">−</button>
+        <span>Meta: <b id="meta-texto">{{ frequencia.meta_semanal }}</b>x por semana</span>
+        <button type="button" class="botao-icone" data-meta="1" aria-label="Aumentar meta">+</button>
+      </div>
+    </section>
+  </div>
+
+  {# ---------------- frequência (calendário interativo) ---------------- #}
+  <section class="painel" style="margin-bottom: 18px" aria-labelledby="t-freq">
+    <div class="painel__topo">
+      <h2 id="t-freq">Frequência</h2>
+      <div class="calendario__nav">
+        <button type="button" class="botao-icone" id="mes-anterior" aria-label="Mês anterior">‹</button>
+        <strong id="mes-titulo">{{ frequencia.titulo }}</strong>
+        <button type="button" class="botao-icone" id="mes-proximo" aria-label="Próximo mês">›</button>
+      </div>
+    </div>
+    <div class="numeros">
+      <div class="numero numero--volt"><strong id="n-mes">{{ frequencia.no_mes }}</strong><span>treinos no mês</span></div>
+      <div class="numero"><strong id="n-30">{{ frequencia.ultimos_30 }}</strong><span>últimos 30 dias</span></div>
+      <div class="numero"><strong id="n-media">{{ "%.1f"|format(frequencia.media_semanal)|replace('.', ',') }}</strong><span>por semana</span></div>
+      <div class="numero"><strong id="n-seq">{{ frequencia.sequencia }}</strong><span>dias seguidos 🔥</span></div>
+    </div>
+    <div class="frequencia-grade">
+      <div id="calendario-area">
+        <table class="calendario">
+          <thead><tr><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th></tr></thead>
+          <tbody id="calendario-corpo"></tbody>
+        </table>
+        <div class="legenda"><span><i></i> Treinou (letra = ficha feita)</span><span><i class="hoje"></i> Hoje</span><span>Tracejado = academia fechada</span><span>Clique num dia para ver os detalhes</span></div>
+      </div>
+      <aside class="dia-detalhe" id="dia-detalhe" aria-live="polite"></aside>
+    </div>
+    <h3 style="margin-top: 22px">Evolução · treinos por semana</h3>
+    <div class="mini-barras" id="evolucao"></div>
+  </section>
+
+  {# ---------------- treinos (modo treino) ---------------- #}
+  <section class="painel" style="margin-bottom: 18px" id="treinos" aria-labelledby="t-treinos">
+    <div class="painel__topo">
+      <h2 id="t-treinos">Meus treinos</h2>
+      <span class="texto-suave">Marque cada série: o descanso começa sozinho</span>
+    </div>
+    {% if treinos %}
+      <div class="abas" role="tablist">
+        {% for t in treinos %}
+          <button type="button" class="aba" role="tab" id="aba-{{ t.id }}" aria-controls="treino-{{ t.id }}"
+                  aria-selected="{{ 'true' if (proximo and t.id == proximo.id) or (not proximo and loop.first) else 'false' }}">
+            <b>{{ t.letra }}</b><span>{{ t.nome.split(' - ', 1)[-1] }}{% if t.feito_hoje %} ✓{% endif %}</span>
+          </button>
+        {% endfor %}
+      </div>
+      {% for t in treinos %}
+        <div class="treino" role="tabpanel" id="treino-{{ t.id }}" aria-labelledby="aba-{{ t.id }}"
+             data-treino="{{ t.id }}" data-total="{{ t.total_series }}" data-feito-hoje="{{ '1' if t.feito_hoje else '0' }}"
+             data-url="{{ url_for('aluno_concluir_treino', treino_id=t.id) }}"
+             {% if not ((proximo and t.id == proximo.id) or (not proximo and loop.first)) %}hidden{% endif %}>
+          <div class="treino__topo">
+            <div>
+              <h3>{{ t.nome }}</h3>
+              <div class="treino__meta" style="margin: 0">
+                {% for gm in t.grupos %}<span class="chip chip--volt">{{ gm }}</span>{% endfor %}
+                <span class="chip">{{ t.itens|length }} exercícios · {{ t.total_series }} séries</span>
+                <span class="chip">por {{ t.personal_nome }}</span>
+                <span class="chip">{% if t.ultima_vez %}último: {{ t.ultima_vez|dias_atras }}{% else %}ainda não feito{% endif %}</span>
+              </div>
+            </div>
+            {% if not t.feito_hoje %}<button type="button" class="botao botao--volt" data-iniciar>▶ Iniciar treino</button>{% endif %}
+          </div>
+          {% if t.feito_hoje %}<div class="feito-hoje">✓ Você já concluiu este treino hoje. Mandou bem!</div>{% endif %}
+          {% if t.observacoes %}<p class="obs">{{ t.observacoes }}</p>{% endif %}
+
+          <div class="progresso-treino">
+            <div class="progresso-treino__linha">
+              <div><small class="texto-suave">Tempo de treino</small><div class="progresso-treino__tempo" data-tempo>00:00</div></div>
+              <div><small class="texto-suave">Séries</small><div class="progresso-treino__tempo"><span data-feitas>0</span>/{{ t.total_series }}</div></div>
+              <div class="botoes">
+                <button type="button" class="botao botao--escuro botao--sm" data-zerar>Recomeçar</button>
+                <button type="button" class="botao botao--volt" data-finalizar>Finalizar treino</button>
+              </div>
+            </div>
+            <div class="barra-progresso"><span data-barra style="width: 0%"></span></div>
+          </div>
+
+          <ol class="lista-exercicios">
+            {% for i in t.itens %}
+              <li class="exercicio" data-descanso="{{ i.descanso_seg }}" data-nome="{{ i.exercicio_nome }}">
+                <div class="exercicio-linha">
+                  <span class="exercicio-linha__n">{{ i.ordem }}</span>
+                  <button type="button" class="exercicio-linha__nome" data-detalhes aria-expanded="false">
+                    <strong>{{ i.exercicio_nome }}</strong><small>{{ i.grupo_nome }}{% if i.observacao %} · {{ i.observacao }}{% endif %}</small>
+                  </button>
+                  <div class="exercicio-linha__prescricao">
+                    <div class="destaque"><b>{{ i.series }}×{{ i.repeticoes }}</b><span>séries × reps</span></div>
+                    <div><b>{{ i.carga_texto }}</b><span>carga</span></div>
+                    <div><b>{{ i.descanso_texto }}</b><span>descanso</span></div>
+                  </div>
+                </div>
+                <div class="exercicio__detalhes">
+                  {% if i.equipamento %}<p><strong>Equipamento:</strong> {{ i.equipamento }}</p>{% endif %}
+                  <p><strong>Como fazer:</strong> {{ i.instrucoes or "Peça orientação ao seu personal." }}</p>
+                  {% if i.observacao %}<p><strong>Dica do personal:</strong> {{ i.observacao }}</p>{% endif %}
+                </div>
+                <div class="series">
+                  {% for n in range(1, i.series + 1) %}
+                    <button type="button" class="serie" data-serie aria-pressed="false" {% if t.feito_hoje %}disabled{% endif %}>Série {{ n }}</button>
+                  {% endfor %}
+                  <small>{{ i.repeticoes }} reps{% if i.carga_kg %} · {{ i.carga_texto }}{% endif %}</small>
+                </div>
+              </li>
+            {% endfor %}
+          </ol>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="vazio">
+        <p>Seu treino ainda não foi montado.</p>
+        <a href="{{ url_for('personais') }}" class="botao botao--volt">{% if usuario.personal_nome %}Ver os personais{% else %}Escolher meu personal{% endif %}</a>
+      </div>
+    {% endif %}
+  </section>
+
+  <div class="info-grade" style="margin-bottom: 64px">
+    <section class="painel" aria-labelledby="t-personal">
+      <p class="selo" id="t-personal">Meu personal</p>
+      {% if usuario.personal_nome %}
+        {% set partes = usuario.personal_nome.split() %}
+        <div class="pessoa" style="margin: 8px 0 14px">
+          <span class="avatar avatar--personal avatar--grande">{{ partes[0][0] }}{{ partes[-1][0] if partes|length > 1 else '' }}</span>
+          <div><h2 style="margin: 0">{{ usuario.personal_nome }}</h2><small>Personal trainer</small></div>
+        </div>
+        <p class="texto-suave">Seu treino é montado e atualizado por {{ partes[0] }}. Sentiu que ficou fácil? Peça para aumentar a carga.</p>
+        <a href="{{ url_for('personais') }}" class="botao botao--contorno botao--sm">Ver todos os personais</a>
+      {% else %}
+        <p class="texto-suave" style="margin-top: 10px">Você ainda não tem um personal. Escolha um para montar o seu treino.</p>
+        <a href="{{ url_for('personais') }}" class="botao botao--volt">Escolher personal</a>
+      {% endif %}
+    </section>
+
+    <section class="painel" aria-labelledby="t-hist">
+      <p class="selo" id="t-hist">Últimos treinos</p>
+      {% if historico %}
+        <ul class="historico-lista">
+          {% for r in historico %}
+            <li>
+              <span class="dia-detalhe__icone">{{ r.letra }}</span>
+              <div><strong>{{ r.treino_nome }}</strong><small>{{ r.data|dia_extenso }} · {{ r.duracao_min }} min</small></div>
+              <span class="badge {% if r.completo %}badge--ativa{% else %}badge--vencida{% endif %}">{{ r.series_feitas }}/{{ r.series_total }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="texto-suave">Quando você finalizar um treino, ele aparece aqui.</p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+
+<div class="timer-descanso" id="timer" role="timer" aria-live="polite">
+  <div class="timer-descanso__anel">
+    <svg viewBox="0 0 64 64"><circle class="fundo" cx="32" cy="32" r="28"/><circle class="valor" id="timer-anel" cx="32" cy="32" r="28" stroke-dasharray="175.9" stroke-dashoffset="0"/></svg>
+    <b id="timer-tempo">0:00</b>
+  </div>
+  <div>
+    <strong id="timer-titulo">Descanso</strong>
+    <small id="timer-sub">Respira e se hidrata</small>
+    <div class="botoes" style="margin-top: 8px">
+      <button type="button" class="botao botao--escuro botao--sm" id="timer-mais">+15s</button>
+      <button type="button" class="botao botao--volt botao--sm" id="timer-pular">Pular</button>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="dados-frequencia">{{ frequencia|tojson }}</script>
+{% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', filename='js/aluno.js') }}"></script>{% endblock %}

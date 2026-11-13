@@ -1,0 +1,41 @@
+{% extends "equipe/_layout.html" %}
+{% block titulo %}Dados e horários{% endblock %}
+
+{% block area %}
+<div class="admin__cabecalho"><div><p class="selo">Administração</p><h1>Dados e horários</h1></div></div>
+
+<form method="post" class="admin-grade admin-grade--form">
+  <div class="painel formulario">
+    <h2>Informações</h2>
+    <label class="campo"><span>Nome</span><input name="nome" required value="{{ academia.nome }}"></label>
+    <label class="campo"><span>Slogan</span><input name="slogan" value="{{ academia.slogan }}"></label>
+    <label class="campo"><span>Descrição</span><textarea name="descricao" rows="3">{{ academia.descricao }}</textarea></label>
+    <label class="campo"><span>Endereço</span><input name="endereco" value="{{ academia.endereco }}"></label>
+    <div class="linha-2">
+      <label class="campo"><span>Cidade</span><input name="cidade" value="{{ academia.cidade }}"></label>
+      <label class="campo"><span>Telefone</span><input type="tel" name="telefone" data-mascara="telefone" value="{{ academia.telefone_formatado }}"></label>
+    </div>
+    <div class="linha-2">
+      <label class="campo"><span>WhatsApp</span><input type="tel" name="whatsapp" data-mascara="telefone" value="{{ academia.whatsapp_formatado }}"></label>
+      <label class="campo"><span>Instagram</span><input name="instagram" value="{{ academia.instagram }}"></label>
+    </div>
+  </div>
+
+  <div class="painel">
+    <h2>Funcionamento</h2>
+    <table class="tabela-semana">
+      {% for dia in dias %}
+        {% set h = academia.horario_do_dia(loop.index0) %}
+        <tr>
+          <td><label class="check"><input type="checkbox" name="aberto_{{ loop.index0 }}" value="1" {% if h %}checked{% endif %} data-dia="{{ loop.index0 }}"><span>{{ dia }}</span></label></td>
+          <td><input type="time" name="abertura_{{ loop.index0 }}" value="{{ h.abertura|hora if h else '08:00' }}" aria-label="Abertura {{ dia }}"></td>
+          <td class="texto-suave">às</td>
+          <td><input type="time" name="fechamento_{{ loop.index0 }}" value="{{ h.fechamento|hora if h else '18:00' }}" aria-label="Fechamento {{ dia }}"></td>
+        </tr>
+      {% endfor %}
+    </table>
+    <p class="texto-suave">O check-in só é liberado dentro desses horários.</p>
+    <button class="botao botao--volt botao--bloco" type="submit">Salvar tudo</button>
+  </div>
+</form>
+{% endblock %}

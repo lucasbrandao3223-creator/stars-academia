@@ -1,0 +1,58 @@
+{% extends "equipe/_layout.html" %}
+{% block titulo %}Alunos{% endblock %}
+
+{% block area %}
+<div class="admin__cabecalho">
+  <div><p class="selo">Equipe</p><h1>Alunos</h1></div>
+  <span class="contador">{{ alunos|length }}</span>
+</div>
+
+<form class="filtros" method="get">
+  <label class="campo"><span>Buscar</span><input type="search" name="busca" value="{{ filtro.busca }}" placeholder="Nome, e-mail ou telefone"></label>
+  <label class="campo">
+    <span>Situação</span>
+    <select name="situacao" onchange="this.form.submit()">
+      <option value="">Todos</option>
+      <option value="ativos" {% if filtro.situacao == 'ativos' %}selected{% endif %}>Com plano ativo</option>
+      <option value="sem_plano" {% if filtro.situacao == 'sem_plano' %}selected{% endif %}>Sem plano ativo</option>
+      <option value="sem_treino" {% if filtro.situacao == 'sem_treino' %}selected{% endif %}>Ativos sem treino montado</option>
+    </select>
+  </label>
+  {% if not usuario.eh_admin %}
+    <label class="check"><input type="checkbox" name="meus" value="1" {% if filtro.meus %}checked{% endif %} onchange="this.form.submit()"> Só meus alunos</label>
+  {% endif %}
+  <button class="botao botao--volt" type="submit">Filtrar</button>
+</form>
+
+{% if alunos %}
+<div class="tabela-rolagem">
+  <table class="tabela">
+    <thead><tr><th>Aluno</th><th>Plano</th><th>Personal</th><th>Último treino</th><th>30 dias</th><th>Treinos</th><th></th></tr></thead>
+    <tbody>
+      {% for a in alunos %}
+        <tr>
+          <td data-rotulo="Aluno">
+            <div class="pessoa"><span class="avatar avatar--sm">{{ a.iniciais }}</span>
+              <div><a class="nome" href="{{ url_for('equipe_ficha', aluno_id=a.id) }}">{{ a.nome }}</a><small>{{ a.objetivo or "—" }}</small></div></div>
+          </td>
+          <td data-rotulo="Plano">
+            {% if a.matricula %}
+              {% set dias = a.matricula.dias_restantes(hoje) %}
+              {{ a.matricula.plano_nome }}<br>
+              {% if dias <= 7 %}<span class="badge badge--vencendo">Vence em {{ dias }}d</span>{% else %}<span class="badge badge--ativa">Ativo</span>{% endif %}
+            {% else %}<span class="badge badge--neutro">Sem plano</span>{% endif %}
+          </td>
+          <td data-rotulo="Personal">{{ a.personal_nome or "—" }}</td>
+          <td data-rotulo="Último treino">{{ a.ultimo_checkin|dias_atras }}</td>
+          <td data-rotulo="30 dias"><strong>{{ a.checkins_30 }}</strong> <small class="texto-suave">check-ins</small></td>
+          <td data-rotulo="Treinos">{% if a.treinos_ativos %}{{ a.treinos_ativos }}{% else %}<span class="badge badge--vencida">Montar</span>{% endif %}</td>
+          <td data-rotulo=""><a class="botao botao--escuro botao--sm" href="{{ url_for('equipe_ficha', aluno_id=a.id) }}">Abrir ficha</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  <div class="vazio"><p>Nenhum aluno encontrado com esses filtros.</p></div>
+{% endif %}
+{% endblock %}

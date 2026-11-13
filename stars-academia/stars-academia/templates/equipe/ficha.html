@@ -1,0 +1,135 @@
+{% extends "equipe/_layout.html" %}
+{% block titulo %}{{ aluno.nome }}{% endblock %}
+
+{% block area %}
+<a href="{{ url_for('equipe_alunos') }}" class="texto-suave" style="text-decoration: none">← Alunos</a>
+
+<div class="ficha-topo" style="margin-top: 12px">
+  <span class="avatar avatar--grande">{{ aluno.iniciais }}</span>
+  <div class="ficha-topo__info">
+    <h1>{{ aluno.nome }}</h1>
+    <div class="ficha-topo__chips">
+      {% if aluno.objetivo %}<span class="chip chip--volt">{{ aluno.objetivo }}</span>{% endif %}
+      {% if aluno.idade() %}<span class="chip">{{ aluno.idade() }} anos</span>{% endif %}
+      {% if aluno.telefone %}<span class="chip">{{ aluno.telefone_formatado }}</span>{% endif %}
+      <span class="chip">{{ aluno.email }}</span>
+    </div>
+  </div>
+  <form method="post" action="{{ url_for('equipe_definir_personal', aluno_id=aluno.id) }}">
+    <label class="campo">
+      <span>Personal responsável</span>
+      <select name="personal_id">
+        <option value="">Nenhum</option>
+        {% for p in personais %}<option value="{{ p.id }}" {% if p.id == aluno.personal_id %}selected{% endif %}>{{ p.nome }}</option>{% endfor %}
+      </select>
+    </label>
+    <button class="botao botao--escuro" type="submit">Salvar</button>
+  </form>
+</div>
+
+<div class="admin-grade">
+  {# ---------------- treinos ---------------- #}
+  <section class="painel" id="treinos">
+    <div class="painel__topo">
+      <h2>Treinos</h2>
+      {% if usuario.pode_montar_treino() %}
+        <a href="{{ url_for('equipe_treino', aluno_id=aluno.id) }}" class="botao botao--volt botao--sm">+ Montar treino</a>
+      {% endif %}
+    </div>
+    {% for t in treinos %}
+      <div class="treino-card {% if not t.ativo %}treino-card--inativo{% endif %}">
+        <div class="treino-card__topo">
+          <div>
+            <strong>{{ t.nome }}</strong> {% if not t.ativo %}<span class="badge badge--inativo">Arquivado</span>{% endif %}
+            <small class="texto-suave" style="display: block">{{ t.itens|length }} exercícios · {{ t.total_series }} séries · por {{ t.personal_nome }}</small>
+          </div>
+          {% if usuario.pode_montar_treino() %}
+          <div class="acoes">
+            <a href="{{ url_for('equipe_treino', aluno_id=aluno.id, treino_id=t.id) }}" class="botao botao--escuro botao--sm">Editar</a>
+            <form method="post" action="{{ url_for('equipe_alternar_treino', treino_id=t.id) }}">
+              <button class="botao botao--sm {% if t.ativo %}botao--perigo{% else %}botao--ok{% endif %}" type="submit">{% if t.ativo %}Arquivar{% else %}Reativar{% endif %}</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+        <details>
+          <summary>Ver exercícios</summary>
+          <table>
+            {% for i in t.itens %}
+              <tr><td>{{ i.ordem }}. {{ i.exercicio_nome }} <small class="texto-suave">· {{ i.grupo_nome }}</small></td>
+                  <td>{{ i.prescricao }}</td><td>{{ i.carga_texto }}</td><td>{{ i.descanso_texto }}</td></tr>
+            {% endfor %}
+          </table>
+        </details>
+      </div>
+    {% else %}
+      <div class="vazio"><p>Nenhum treino montado para {{ aluno.primeiro_nome }}.</p>
+        {% if usuario.pode_montar_treino() %}<a href="{{ url_for('equipe_treino', aluno_id=aluno.id) }}" class="botao botao--volt">Montar o primeiro treino</a>{% endif %}</div>
+    {% endfor %}
+  </section>
+
+  <div class="coluna">
+    {# ---------------- matrícula ---------------- #}
+    <section class="painel" id="matricula">
+      <div class="painel__topo"><h2>Matrícula</h2></div>
+      {% set vigente = matricula.vigente %}
+      {% if vigente %}
+        {% set dias = vigente.dias_restantes(hoje) %}
+        <p><strong>{{ vigente.plano_nome }}</strong> <span class="badge {% if dias <= 7 %}badge--vencendo{% else %}badge--ativa{% endif %}">{% if dias <= 7 %}Vence em {{ dias }}d{% else %}Ativo{% endif %}</span></p>
+        <div class="barra-progresso {% if dias <= 7 %}barra-progresso--alerta{% endif %}"><span style="width: {{ vigente.progresso(hoje) }}%"></span></div>
+        <div class="linha-info"><span>{{ vigente.data_inicio|data_br }}</span><span>até {{ vigente.data_fim|data_br }}</span></div>
+      {% else %}
+        <p class="aviso-inline">{{ aluno.primeiro_nome }} está sem plano ativo{% if matricula.agendada %} (renovação começa em {{ matricula.agendada.data_inicio|data_br }}){% endif %}.</p>
+      {% endif %}
+
+      {% if usuario.eh_admin %}
+        <form method="post" action="{{ url_for('admin_matricular', aluno_id=aluno.id) }}" class="formulario" style="margin-top: 18px">
+          <div class="linha-2">
+            <label class="campo"><span>Plano</span>
+              <select name="plano_id" required>{% for p in planos %}<option value="{{ p.id }}">{{ p.nome }} · {{ p.total_formatado }}</option>{% endfor %}</select></label>
+            <label class="campo"><span>Pagamento</span>
+              <select name="forma_pagamento">{% for f in FormaPagamento %}<option value="{{ f.value }}">{{ f.rotulo }}</option>{% endfor %}</select></label>
+          </div>
+          <label class="campo"><span>Início (vazio = automático)</span><input type="date" name="data_inicio"></label>
+          <button class="botao botao--volt" type="submit">{% if vigente %}Renovar matrícula{% else %}Matricular{% endif %}</button>
+        </form>
+      {% endif %}
+
+      {% if matricula.historico %}
+        <h3 style="margin-top: 22px">Histórico</h3>
+        <ul class="lista-simples">
+          {% for m in matricula.historico %}
+            {% set s = m.situacao(hoje) %}
+            <li>
+              <div>{{ m.plano_nome }} · {{ m.valor_formatado }}<small>{{ m.data_inicio|data_br }} a {{ m.data_fim|data_br }} · {{ m.forma_pagamento.rotulo }}</small></div>
+              <div class="acoes">
+                <span class="badge badge--{{ s.value }}">{{ s.rotulo }}</span>
+                {% if usuario.eh_admin and s.value in ('ativa', 'agendada') %}
+                  <form method="post" action="{{ url_for('admin_cancelar_matricula', matricula_id=m.id) }}" data-confirmar="Cancelar esta matrícula?">
+                    <button class="botao botao--perigo botao--sm" type="submit">Cancelar</button>
+                  </form>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+
+    {# ---------------- frequência ---------------- #}
+    <section class="painel">
+      <div class="painel__topo"><h2>Frequência</h2><span class="texto-suave">{{ frequencia.titulo }}</span></div>
+      <div class="numeros" style="grid-template-columns: repeat(3, 1fr)">
+        <div class="numero numero--volt"><strong>{{ frequencia.no_mes }}</strong><span>no mês</span></div>
+        <div class="numero"><strong>{{ frequencia.ultimos_30 }}</strong><span>30 dias</span></div>
+        <div class="numero"><strong>{{ "%.1f"|format(frequencia.media_semanal)|replace('.', ',') }}</strong><span>por semana</span></div>
+      </div>
+      <h3>Últimos check-ins</h3>
+      <ul class="lista-simples">
+        {% for c in ultimos_checkins %}<li><span>{{ c.data|dia_extenso }}</span><span class="texto-suave">{{ c.hora_texto }}</span></li>
+        {% else %}<li class="texto-suave">Nenhum check-in ainda.</li>{% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}

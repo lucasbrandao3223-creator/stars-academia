@@ -1,0 +1,60 @@
+{% extends "equipe/_layout.html" %}
+{% block titulo %}Exercícios{% endblock %}
+
+{% block area %}
+<div class="admin__cabecalho"><div><p class="selo">Equipe</p><h1>Biblioteca de exercícios</h1></div></div>
+
+<div class="admin-grade admin-grade--form">
+  <div class="painel">
+    <h2>{% if editando %}Editar exercício{% else %}Novo exercício{% endif %}</h2>
+    <form method="post" class="formulario" action="{{ url_for('equipe_exercicios', exercicio_id=editando.id) if editando else url_for('equipe_exercicios') }}">
+      <label class="campo"><span>Nome</span><input name="nome" required value="{{ form.get('nome', editando.nome if editando else '') }}" placeholder="Ex.: Supino declinado"></label>
+      <div class="linha-2">
+        <label class="campo"><span>Grupo muscular</span>
+          <select name="grupo_muscular_id" required>
+            {% set atual = (form.get('grupo_muscular_id') or (editando.grupo_muscular_id if editando else grupo_atual))|string %}
+            {% for g in grupos %}<option value="{{ g.id }}" {% if atual == g.id|string %}selected{% endif %}>{{ g.nome }}</option>{% endfor %}
+          </select></label>
+        <label class="campo"><span>Equipamento</span><input name="equipamento" value="{{ form.get('equipamento', editando.equipamento if editando else '') }}" placeholder="Ex.: Halteres"></label>
+      </div>
+      <label class="campo"><span>Como executar</span><textarea name="instrucoes" rows="3">{{ form.get('instrucoes', editando.instrucoes if editando else '') }}</textarea></label>
+      <div class="botoes">
+        <button class="botao botao--volt" type="submit">{% if editando %}Salvar alterações{% else %}Adicionar{% endif %}</button>
+        {% if editando %}<a class="botao botao--contorno" href="{{ url_for('equipe_exercicios') }}">Cancelar</a>{% endif %}
+      </div>
+    </form>
+  </div>
+
+  <div class="painel">
+    <div class="painel__topo">
+      <h2>Cadastrados <span class="contador">{{ exercicios|length }}</span></h2>
+      <form method="get">
+        <select name="grupo" onchange="this.form.submit()" aria-label="Filtrar por grupo">
+          <option value="">Todos os grupos</option>
+          {% for g in grupos %}<option value="{{ g.id }}" {% if grupo_atual == g.id %}selected{% endif %}>{{ g.nome }}</option>{% endfor %}
+        </select>
+      </form>
+    </div>
+    {% for grupo, lista in exercicios|groupby('grupo_nome') %}
+      <h3 class="grupo-titulo">{{ grupo }}</h3>
+      <ul class="lista-admin">
+        {% for e in lista %}
+          <li>
+            <div><strong>{{ e.nome }}</strong><small>{{ e.equipamento or "—" }}{% if e.usos %} · em {{ e.usos }} treino(s){% endif %}</small></div>
+            <div class="acoes">
+              <a class="botao botao--escuro botao--sm" href="{{ url_for('equipe_exercicios', exercicio_id=e.id) }}">Editar</a>
+              {% if not e.usos %}
+              <form method="post" action="{{ url_for('equipe_excluir_exercicio', exercicio_id=e.id) }}" data-confirmar="Excluir {{ e.nome }}?">
+                <button class="botao botao--perigo botao--sm" type="submit">Excluir</button>
+              </form>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="vazio"><p>Nenhum exercício neste grupo.</p></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

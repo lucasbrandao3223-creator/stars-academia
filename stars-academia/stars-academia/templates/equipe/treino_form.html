@@ -1,0 +1,64 @@
+{% extends "equipe/_layout.html" %}
+{% block titulo %}{% if treino %}Editar treino{% else %}Montar treino{% endif %}{% endblock %}
+
+{% macro linha_item(l, exercicios) %}
+  <div class="item-treino">
+    <label class="campo campo--exercicio"><span>Exercício</span>
+      <select name="exercicio_id" required>
+        <option value="">Escolha…</option>
+        {% for grupo, lista in exercicios|groupby('grupo_nome') %}
+          <optgroup label="{{ grupo }}">
+            {% for e in lista %}<option value="{{ e.id }}" {% if l and l.exercicio_id|string == e.id|string %}selected{% endif %}>{{ e.nome }}</option>{% endfor %}
+          </optgroup>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="campo"><span>Séries</span><input type="number" name="series" min="1" max="10" value="{{ l.series if l else 3 }}" required></label>
+    <label class="campo"><span>Reps</span><input name="repeticoes" maxlength="20" value="{{ l.repeticoes if l else '12' }}" required></label>
+    <label class="campo"><span>Carga (kg)</span><input type="number" name="carga_kg" min="0" max="500" step="0.5" value="{{ l.carga_kg if l else '' }}"></label>
+    <label class="campo"><span>Descanso (s)</span><input type="number" name="descanso_seg" min="0" max="600" step="15" value="{{ l.descanso_seg if l else 60 }}"></label>
+    <label class="campo campo--obs"><span>Observação</span><input name="observacao" maxlength="120" value="{{ l.observacao if l else '' }}" placeholder="Opcional"></label>
+    <div class="item-treino__acoes">
+      <button type="button" class="botao-icone" data-acao="subir" aria-label="Subir">↑</button>
+      <button type="button" class="botao-icone" data-acao="descer" aria-label="Descer">↓</button>
+      <button type="button" class="botao-icone botao-icone--perigo" data-acao="remover" aria-label="Remover">✕</button>
+    </div>
+  </div>
+{% endmacro %}
+
+{% block area %}
+<a href="{{ url_for('equipe_ficha', aluno_id=aluno.id) }}" class="texto-suave" style="text-decoration: none">← Ficha de {{ aluno.primeiro_nome }}</a>
+<div class="admin__cabecalho" style="margin-top: 12px">
+  <div><p class="selo">{{ aluno.nome }}{% if aluno.objetivo %} · {{ aluno.objetivo }}{% endif %}</p>
+    <h1>{% if treino %}Editar treino{% else %}Montar treino{% endif %}</h1></div>
+</div>
+
+<form method="post" class="formulario" id="form-treino">
+  <div class="painel formulario">
+    <label class="campo"><span>Nome do treino</span>
+      <input name="nome" id="campo-nome" required maxlength="80" value="{{ form.get('nome', treino.nome if treino else '') }}" placeholder="Ex.: Treino A - Peito, Ombros e Tríceps">
+      <div class="sugestoes">{% for s in sugestoes %}<button type="button" data-sugestao="{{ s }}">{{ s }}</button>{% endfor %}</div>
+    </label>
+    <label class="campo"><span>Orientações gerais</span>
+      <textarea name="observacoes" rows="2" placeholder="Ex.: aquecer 5 minutos na esteira antes">{{ form.get('observacoes', treino.observacoes if treino else '') }}</textarea></label>
+  </div>
+
+  <div class="painel">
+    <div class="painel__topo"><h2>Exercícios</h2><span class="texto-suave">Use ↑ ↓ para mudar a ordem</span></div>
+    <div class="itens-treino" id="itens">
+      {% for l in linhas %}{{ linha_item(l, exercicios) }}{% else %}{{ linha_item(none, exercicios) }}{% endfor %}
+    </div>
+    <template id="modelo-item">{{ linha_item(none, exercicios) }}</template>
+    <button type="button" class="adicionar-item" id="adicionar">+ Adicionar exercício</button>
+  </div>
+
+  <div class="botoes">
+    <button class="botao botao--volt botao--grande" type="submit">Salvar treino</button>
+    <a href="{{ url_for('equipe_ficha', aluno_id=aluno.id) }}" class="botao botao--contorno botao--grande">Cancelar</a>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/treino.js') }}"></script>
+{% endblock %}

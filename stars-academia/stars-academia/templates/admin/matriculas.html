@@ -1,0 +1,54 @@
+{% extends "equipe/_layout.html" %}
+{% block titulo %}Matrículas{% endblock %}
+
+{% block area %}
+<div class="admin__cabecalho">
+  <div><p class="selo">Administração</p><h1>Matrículas</h1></div>
+  <span class="contador">{{ matriculas|length }}</span>
+</div>
+
+<form class="filtros" method="get">
+  <label class="campo"><span>Situação</span>
+    <select name="situacao" onchange="this.form.submit()">
+      {% for valor, rotulo in [('ativa', 'Ativas'), ('vencendo', 'Vencendo em 7 dias'), ('agendada', 'Renovações agendadas'), ('vencida', 'Vencidas'), ('cancelada', 'Canceladas'), ('', 'Todas')] %}
+        <option value="{{ valor }}" {% if filtro.situacao == valor %}selected{% endif %}>{{ rotulo }}</option>
+      {% endfor %}
+    </select></label>
+  <label class="campo"><span>Aluno</span><input type="search" name="busca" value="{{ filtro.busca }}" placeholder="Nome do aluno"></label>
+  <button class="botao botao--volt" type="submit">Filtrar</button>
+</form>
+<p class="texto-suave">Para matricular ou renovar, abra a ficha do aluno em <a href="{{ url_for('equipe_alunos') }}">Alunos</a>.</p>
+
+{% if matriculas %}
+<div class="tabela-rolagem">
+  <table class="tabela">
+    <thead><tr><th>Aluno</th><th>Plano</th><th>Período</th><th>Valor</th><th>Pagamento</th><th>Situação</th><th></th></tr></thead>
+    <tbody>
+      {% for m in matriculas %}
+        {% set s = m.situacao(hoje) %}
+        <tr>
+          <td data-rotulo="Aluno"><a class="nome" href="{{ url_for('equipe_ficha', aluno_id=m.aluno_id) }}">{{ m.aluno_nome }}</a>{% if m.aluno_telefone %}<br><small class="texto-suave">{{ m.aluno_telefone_formatado }}</small>{% endif %}</td>
+          <td data-rotulo="Plano">{{ m.plano_nome }}</td>
+          <td data-rotulo="Período">{{ m.data_inicio|data_br }} a {{ m.data_fim|data_br }}</td>
+          <td data-rotulo="Valor">{{ m.valor_formatado }}</td>
+          <td data-rotulo="Pagamento">{{ m.forma_pagamento.rotulo }}</td>
+          <td data-rotulo="Situação">
+            {% if s.value == 'ativa' and m.dias_restantes(hoje) <= 7 %}<span class="badge badge--vencendo">Vence em {{ m.dias_restantes(hoje) }}d</span>
+            {% else %}<span class="badge badge--{{ s.value }}">{{ s.rotulo }}</span>{% endif %}
+          </td>
+          <td data-rotulo="">
+            {% if s.value in ('ativa', 'agendada') %}
+              <form method="post" action="{{ url_for('admin_cancelar_matricula', matricula_id=m.id) }}" data-confirmar="Cancelar a matrícula de {{ m.aluno_nome }}?">
+                <button class="botao botao--perigo botao--sm" type="submit">Cancelar</button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  <div class="vazio"><p>Nenhuma matrícula com esse filtro.</p></div>
+{% endif %}
+{% endblock %}

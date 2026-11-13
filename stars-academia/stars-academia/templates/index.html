@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% set cores = ["linear-gradient(135deg,#FFE27A,#FF9F1C)", "linear-gradient(135deg,#9BE7FF,#3D8BFF)", "linear-gradient(135deg,#FFB3C7,#FF5C8A)", "linear-gradient(135deg,#B9F6CA,#2FBF71)", "linear-gradient(135deg,#D6C2FF,#8A5CFF)", "linear-gradient(135deg,#FFD0A8,#FF6B2C)", "linear-gradient(135deg,#C8F2EE,#14B8A6)", "linear-gradient(135deg,#F5F5F5,#9AA3AF)"] %}
+
+{% block conteudo %}
+<section class="hero">
+  <div class="estrelas-fundo" data-estrelas="40" aria-hidden="true"></div>
+  <div class="container hero__grade">
+    <div>
+      <p class="selo">{{ academia.nome }}</p>
+      <h1>Treine como<em>uma estrela.</em></h1>
+      <p class="hero__sub">Musculação, aeróbico e {{ personais|length }} personal trainers prontos para montar o seu treino. Matricule-se online, faça check-in pelo celular e marque cada série no modo treino.</p>
+      <div class="botoes">
+        <a href="#planos" class="botao botao--volt botao--grande">Ver planos</a>
+        {% if usuario and not usuario.faz_parte_da_equipe %}<a href="{{ url_for('aluno_painel') }}" class="botao botao--contorno botao--grande">Minha área</a>
+        {% elif not usuario %}<a href="{{ url_for('login') }}" class="botao botao--contorno botao--grande">Já sou aluno</a>{% endif %}
+      </div>
+      <div class="hero__numeros">
+        <div><strong data-contar="{{ numeros.alunos }}">{{ numeros.alunos }}</strong><span>alunos treinando agora</span></div>
+        <div><strong data-contar="{{ personais|length }}">{{ personais|length }}</strong><span>personal trainers</span></div>
+        <div><strong data-contar="{{ numeros.exercicios }}">{{ numeros.exercicios }}</strong><span>exercícios na biblioteca</span></div>
+        <div><strong data-contar="{{ numeros.checkins }}">{{ numeros.checkins }}</strong><span>check-ins registrados</span></div>
+      </div>
+    </div>
+
+    <div class="mock-app" aria-hidden="true">
+      <div class="mock-app__topo"><strong>Modo treino</strong><span class="badge badge--ativa">Em andamento</span></div>
+      <div class="mock-app__checkin"><span>⭐</span><span>Treino B · 18 de 22 séries</span></div>
+      <div class="mock-app__dias">
+        {% for on in [1,0,1,1,0,1,0, 1,1,0,1,1,0,0, 1,0,1,1,1,0,0] %}<span class="{% if on %}on{% endif %}"></span>{% endfor %}
+      </div>
+      <div class="mock-app__exercicio"><span>Puxada frontal</span><b>✓ ✓ ✓ ✓</b></div>
+      <div class="mock-app__exercicio"><span>Remada curvada</span><b>✓ ✓ ·</b></div>
+      <div class="mock-app__exercicio"><span>Descanso</span><b>0:45</b></div>
+    </div>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="container">
+    <div class="secao__topo">
+      <div><p class="selo">Estrutura</p><h2>1.200 m² para você brilhar</h2></div>
+      <p class="texto-suave">Climatizado, com vestiários completos e estacionamento.</p>
+    </div>
+    <div class="areas">
+      <article class="area">
+        <span class="area__tag">Musculação</span>
+        <span class="area__icone"><svg viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg></span>
+        <strong>Pesos livres</strong><p>Halteres até 50 kg, 6 gaiolas de agachamento e plataformas de levantamento.</p>
+      </article>
+      <article class="area">
+        <span class="area__tag">Máquinas</span>
+        <span class="area__icone"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="6" height="18" rx="1"/><path d="M10 7h7l3 4-3 4h-7"/></svg></span>
+        <strong>40 aparelhos</strong><p>Linha completa para todos os grupos musculares, sempre revisada.</p>
+      </article>
+      <article class="area">
+        <span class="area__tag">Cardio</span>
+        <span class="area__icone"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg></span>
+        <strong>Área aeróbica</strong><p>Esteiras, bikes, elípticos e escadas com vista para a rua.</p>
+      </article>
+      <article class="area">
+        <span class="area__tag">Funcional</span>
+        <span class="area__icone"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M12 7v6l-4 7M12 13l4 7M6 10l6-2 6 2"/></svg></span>
+        <strong>Espaço livre</strong><p>Grama sintética, cordas, kettlebells e barras para calistenia.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="secao secao--escura" id="planos">
+  <div class="container">
+    <div class="secao__topo">
+      <div><p class="selo">Escolha o seu</p><h2>Planos</h2></div>
+      <div class="alternar" role="group" aria-label="Mostrar preço">
+        <button type="button" data-preco="mensal" aria-pressed="true">Por mês</button>
+        <button type="button" data-preco="total" aria-pressed="false">Valor total</button>
+      </div>
+    </div>
+    <div class="planos">
+      {% for p in planos %}
+        {% set destaque = loop.index == 3 %}
+        <article class="plano {% if destaque %}plano--destaque{% endif %}">
+          {% if destaque %}<span class="plano__fita">⭐ Mais escolhido</span>{% endif %}
+          <h3>{{ p.nome }}</h3>
+          <span class="texto-suave">{{ p.duracao_texto }}</span>
+          <div class="plano__preco">
+            <strong data-mensal="{{ p.preco_formatado }}" data-total="{{ p.total_formatado }}">{{ p.preco_formatado }}</strong>
+            <span data-mensal="/mês" data-total="no total">/mês</span>
+          </div>
+          <div class="plano__total" data-mensal="Total {{ p.total_formatado }}" data-total="{{ p.duracao_meses }}x de {{ p.preco_formatado }}">Total {{ p.total_formatado }}</div>
+          {% if p.economia %}<span class="plano__economia">Economize {{ p.economia }}%</span>{% endif %}
+          <p class="plano__desc">{{ p.descricao }}</p>
+          {% if usuario and usuario.faz_parte_da_equipe %}
+            <span class="botao botao--escuro botao--bloco" aria-disabled="true">Matrícula pela ficha do aluno</span>
+          {% elif usuario %}
+            <a href="{{ url_for('assinar', plano_id=p.id) }}" class="botao {% if destaque %}botao--volt{% else %}botao--contorno{% endif %} botao--bloco">Assinar</a>
+          {% else %}
+            <a href="{{ url_for('cadastro', proximo=url_for('assinar', plano_id=p.id)) }}" class="botao {% if destaque %}botao--volt{% else %}botao--contorno{% endif %} botao--bloco">Quero esse</a>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="secao" id="equipe">
+  <div class="container">
+    <div class="secao__topo">
+      <div><p class="selo">Quem monta o seu treino</p><h2>Nossos personal trainers</h2></div>
+      <a href="{{ url_for('personais') }}" class="botao botao--contorno">Conhecer os {{ personais|length }} personais</a>
+    </div>
+    <div class="equipe">
+      {% for p in personais[:4] %}
+        <a class="personal-card painel" href="{{ url_for('personais') }}#personal-{{ p.id }}" style="text-decoration: none">
+          <div class="personal-card__topo">
+            <span class="avatar avatar--personal" style="--cor-avatar: {{ cores[loop.index0 % cores|length] }}">{{ p.iniciais }}</span>
+            <div><h3>{{ p.nome }}</h3><span class="personal-card__esp">{{ p.especialidade }}</span></div>
+          </div>
+          <p>{{ p.bio|truncate(110) }}</p>
+          <div class="personal-card__numeros">
+            <div><b>{{ p.anos_experiencia or "—" }}</b>anos de experiência</div>
+            <div><b>{{ p.total_alunos }}</b>alunos</div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="secao secao--escura" id="imc">
+  <div class="container imc">
+    <div>
+      <p class="selo">Calculadora</p>
+      <h2>Descubra seu IMC</h2>
+      <p class="texto-suave">O Índice de Massa Corporal é um primeiro passo. Na avaliação física o personal mede muito mais: percentual de gordura, medidas e mobilidade.</p>
+      <div class="formulario" style="margin-top: 22px">
+        <label class="campo-range">
+          <span class="campo-range__topo">Peso <b><span id="imc-peso-txt">75</span> kg</b></span>
+          <input type="range" id="imc-peso" min="35" max="180" value="75">
+        </label>
+        <label class="campo-range">
+          <span class="campo-range__topo">Altura <b><span id="imc-altura-txt">1,75</span> m</b></span>
+          <input type="range" id="imc-altura" min="130" max="215" value="175">
+        </label>
+      </div>
+    </div>
+    <div class="imc__resultado" aria-live="polite">
+      <span class="texto-suave">Seu IMC</span>
+      <div class="imc__valor" id="imc-valor">24,5</div>
+      <strong id="imc-classe">Peso normal</strong>
+      <div class="imc__faixa"><span class="imc__marcador" id="imc-marcador" style="left: 40%"></span></div>
+      <div class="imc__legenda"><span>Abaixo</span><span>Normal</span><span>Sobrepeso</span><span>Obesidade</span></div>
+      <p class="texto-suave" id="imc-dica" style="margin: 16px 0 0">Ótimo ponto de partida para ganhar força e condicionamento.</p>
+    </div>
+  </div>
+</section>
+
+<section class="secao" id="contato">
+  <div class="container info-grade">
+    <div class="painel">
+      <p class="selo">Funcionamento</p>
+      <h2>Horários</h2>
+      <table class="tabela-horarios">
+        {% for nome, h in academia.grade_semana() %}
+          <tr class="{% if loop.index0 == agora.weekday() %}hoje{% endif %}">
+            <th>{{ nome }}{% if loop.index0 == agora.weekday() %} (hoje){% endif %}</th>
+            <td>{% if h %}{{ h.texto }}{% else %}<span class="texto-suave">Fechado</span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </table>
+      {% set hh = academia.horario_do_dia(agora.weekday()) %}
+      <p style="margin: 16px 0 0">{% if academia.esta_aberta(agora) %}<span class="badge badge--ativa">Aberta agora</span> até {{ hh.fechamento|hora }}{% else %}<span class="badge badge--cancelada">Fechada agora</span>{% endif %}</p>
+    </div>
+    <div class="painel">
+      <p class="selo">Onde estamos</p>
+      <h2>Contato</h2>
+      <p class="texto-suave">{{ academia.descricao }}</p>
+      <ul class="contato-lista">
+        {% if academia.endereco %}
+        <li><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+          <div>{{ academia.endereco }}<small>{{ academia.cidade }} · <a href="https://www.google.com/maps/search/?api=1&query={{ (academia.endereco ~ ' ' ~ academia.cidade)|urlencode }}" target="_blank" rel="noopener">ver no mapa</a></small></div></li>
+        {% endif %}
+        {% if academia.link_whatsapp %}
+        <li><svg viewBox="0 0 24 24"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19.1L4 20z"/></svg>
+          <div><a href="{{ academia.link_whatsapp }}" target="_blank" rel="noopener">{{ academia.whatsapp_formatado }}</a><small>WhatsApp</small></div></li>
+        {% endif %}
+        {% if academia.link_instagram %}
+        <li><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>
+          <div><a href="{{ academia.link_instagram }}" target="_blank" rel="noopener">{{ academia.instagram }}</a><small>Instagram</small></div></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="secao secao--escura" id="duvidas">
+  <div class="container">
+    <div class="secao__topo"><div><p class="selo">Dúvidas</p><h2>Perguntas frequentes</h2></div></div>
+    <div class="faq">
+      <details open><summary>Como funciona o check-in?</summary><p>Ao chegar, abra "Minha área" no celular e toque em Check-in. Ele só funciona com plano ativo e dentro do horário de funcionamento. Se você finalizar um treino no modo treino, o check-in do dia é feito automaticamente.</p></details>
+      <details><summary>Quem monta o meu treino?</summary><p>Um dos nossos {{ personais|length }} personal trainers. Você pode escolher o personal na página de personais; ele monta suas fichas (Treino A, B, C...) com séries, repetições, carga e descanso, e vai ajustando conforme você evolui.</p></details>
+      <details><summary>O que é o modo treino?</summary><p>Na sua área, cada exercício mostra as séries para marcar. A cada série marcada, um cronômetro de descanso começa sozinho e apita quando acabar. No fim, toque em "Finalizar treino" para salvar no seu histórico.</p></details>
+      <details><summary>Posso renovar antes de o plano acabar?</summary><p>Sim. Nos últimos 15 dias do plano a renovação é liberada e o novo plano começa no dia seguinte ao fim do atual, sem perder nenhum dia.</p></details>
+      <details><summary>Preciso de avaliação física?</summary><p>Ela é recomendada antes de começar e está inclusa nos planos trimestral, semestral e anual. Agende na recepção.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="container">
+    <div class="chamada">
+      <div class="estrelas-fundo" data-estrelas="18" aria-hidden="true"></div>
+      <div>
+        <h2>Bora brilhar hoje?</h2>
+        <p>Crie sua conta, escolha o plano, escolha seu personal e faça seu primeiro check-in.</p>
+      </div>
+      <a href="{{ url_for('aluno_painel') if usuario else url_for('cadastro') }}" class="botao botao--grande">{% if usuario %}Ir para minha área{% else %}Criar minha conta{% endif %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', filename='js/site.js') }}"></script>{% endblock %}

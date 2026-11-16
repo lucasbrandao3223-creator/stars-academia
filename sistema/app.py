@@ -1,6 +1,6 @@
 """STARS Academia - sistema web (Flask).
 
-Executar:  python app.py   e abrir  http://127.0.0.1:5000
+Executar (da pasta principal):  python sistema/app.py   e abrir  http://127.0.0.1:5000
 """
 from datetime import datetime
 from functools import wraps
@@ -17,7 +17,8 @@ from repositories import (AcademiaRepositorio, ExercicioRepositorio, GrupoMuscul
 from services import AuthService, CheckinService, GestaoService, MatriculaService, TreinoService
 from utils import DIAS_SEMANA, formatar_data, formatar_moeda, formatar_telefone, hora_str, para_data
 
-app = Flask(__name__)
+# templates e static ficam fora da pasta "sistema" (na pasta principal do projeto)
+app = Flask(__name__, template_folder="../templates", static_folder="../static")
 app.config["SECRET_KEY"] = config.SECRET_KEY
 banco = BancoDeDados()
 

@@ -1,6 +1,6 @@
 """Recria o banco da academia do zero com os dados de demonstração.
 
-Uso:  python init_db.py
+Uso:  python sistema/init_db.py   (rodando da pasta principal do projeto)
 """
 from database import BancoDeDados
 from database.seed import popular

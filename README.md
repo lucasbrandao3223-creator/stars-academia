@@ -12,7 +12,7 @@ Sistema web completo de academia: **planos e matrículas**, **check-in dos aluno
 ## Como rodar (Windows)
 
 1. Instale o **Python** em python.org/downloads (na instalação marque **"Add python.exe to PATH"**).
-2. Descompacte o projeto e entre na pasta `academia` (a que tem o arquivo `app.py`).
+2. Descompacte o projeto e entre na pasta principal (a que tem as pastas `sistema`, `templates` e `static`).
 3. Clique na barra de endereço da pasta, apague o texto, digite `cmd` e aperte **Enter**.
 4. Na janela preta, rode (só na primeira vez):
    ```
@@ -20,15 +20,15 @@ Sistema web completo de academia: **planos e matrículas**, **check-in dos aluno
    ```
 5. Ligue o site:
    ```
-   python app.py
+   python sistema/app.py
    ```
 6. Abra no navegador: **http://127.0.0.1:5000**
 
 A janela preta precisa ficar aberta enquanto usa o site (Ctrl + C desliga).
-Na primeira execução o banco `database/academia.db` é criado sozinho com dados de exemplo.
+Na primeira execução o banco `sistema/database/academia.db` é criado sozinho com dados de exemplo.
 
-- Recriar o banco de exemplo do zero: `python init_db.py`
-- Rodar os testes automatizados: `python -m unittest -v`
+- Recriar o banco de exemplo do zero: `python sistema/init_db.py`
+- Rodar os testes automatizados: `cd sistema` e depois `python -m unittest -v`
 
 ### Contas de demonstração (senha de todas: `123456`)
 
@@ -106,7 +106,7 @@ o aluno escolhe com qual personal quer treinar.
 | **Métodos de classe / fábrica** | `Matricula.nova()` calcula o fim e o valor a partir do plano; `Usuario.criar()` (*Factory Method*) |
 | **Exceções personalizadas** | `exceptions.py` (`MatriculaErro`, `CheckinErro`, `PermissaoNegadaErro`...) |
 | **Camadas** | *Repository/DAO* (SQL), *Service* (regras de negócio), injeção do relógio para testes |
-| **Testes** | `tests/test_sistema.py` — 34 testes com `unittest` |
+| **Testes** | `sistema/tests/test_sistema.py` — 34 testes com `unittest` |
 
 ```
 Navegador ──► app.py (rotas Flask) ──► services/ (regras) ──► repositories/ (SQL) ──► SQLite
@@ -128,19 +128,20 @@ Navegador ──► app.py (rotas Flask) ──► services/ (regras) ──► 
 ## Estrutura de pastas
 
 ```
-academia/
-├── app.py                 # rotas do site (Flask)
-├── config.py              # configurações e regras (dias para renovar, alerta de vencimento)
-├── exceptions.py          # exceções do sistema
-├── utils.py               # datas, moeda, telefone
-├── init_db.py             # recria o banco com dados de exemplo
-├── requirements.txt
-├── database/              # schema.sql, schema_mysql.sql, conexão e dados de exemplo
-├── docs/                  # DER.png (diagrama do banco) e der.dot (fonte do diagrama)
-├── models/                # classes de domínio (POO)
-├── repositories/          # acesso ao banco (DAO)
-├── services/              # regras de negócio
+stars-academia/
+├── sistema/               # TODO o código Python fica aqui
+│   ├── app.py             # rotas do site (Flask)
+│   ├── config.py          # configurações e regras (dias para renovar, alerta de vencimento)
+│   ├── exceptions.py      # exceções do sistema
+│   ├── utils.py           # datas, moeda, telefone
+│   ├── init_db.py         # recria o banco com dados de exemplo
+│   ├── database/          # schema.sql, schema_mysql.sql, conexão e dados de exemplo
+│   ├── models/            # classes de domínio (POO)
+│   ├── repositories/      # acesso ao banco (DAO)
+│   ├── services/          # regras de negócio
+│   └── tests/             # testes automatizados
 ├── templates/             # páginas HTML (Jinja2): público, aluno/, equipe/, admin/
 ├── static/                # css, js e imagens
-└── tests/                 # testes automatizados
+├── docs/                  # modelagem do banco
+└── requirements.txt
 ```

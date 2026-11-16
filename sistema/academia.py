@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from exceptions import ValidacaoErro
-from models.entidade import Entidade
+from entidade import Entidade
 from utils import DIAS_CURTOS, DIAS_SEMANA, apenas_digitos, formatar_telefone, hora_str, para_hora
 
 

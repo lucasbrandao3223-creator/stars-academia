@@ -3,9 +3,11 @@ import calendar
 from datetime import datetime, timedelta
 
 from exceptions import CheckinErro, PermissaoNegadaErro
-from models.matricula import Checkin
-from models.usuario import Aluno
-from repositories import AcademiaRepositorio, CheckinRepositorio, MatriculaRepositorio, TreinoRealizadoRepositorio
+from matricula import Checkin
+from usuario import Aluno
+from academia_repo import AcademiaRepositorio
+from matricula_repo import CheckinRepositorio, MatriculaRepositorio
+from treino_repo import TreinoRealizadoRepositorio
 from utils import hora_str
 
 MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto",

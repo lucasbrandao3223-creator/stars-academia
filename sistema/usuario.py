@@ -5,7 +5,7 @@ from abc import abstractmethod
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from exceptions import ValidacaoErro
-from models.entidade import Entidade
+from entidade import Entidade
 from utils import apenas_digitos, calcular_idade, formatar_telefone, para_data
 
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")

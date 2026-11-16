@@ -1,7 +1,7 @@
 """Cadastro de alunos e login."""
 from exceptions import AutenticacaoErro, ValidacaoErro
-from models.usuario import Aluno
-from repositories import UsuarioRepositorio
+from usuario import Aluno
+from usuario_repo import UsuarioRepositorio
 
 
 class AuthService:

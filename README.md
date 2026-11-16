@@ -25,7 +25,7 @@ Sistema web completo de academia: **planos e matrículas**, **check-in dos aluno
 6. Abra no navegador: **http://127.0.0.1:5000**
 
 A janela preta precisa ficar aberta enquanto usa o site (Ctrl + C desliga).
-Na primeira execução o banco `sistema/database/academia.db` é criado sozinho com dados de exemplo.
+Na primeira execução o banco `sistema/academia.db` é criado sozinho com dados de exemplo.
 
 - Recriar o banco de exemplo do zero: `python sistema/init_db.py`
 - Rodar os testes automatizados: `cd sistema` e depois `python -m unittest -v`
@@ -78,11 +78,11 @@ o aluno escolhe com qual personal quer treinar.
 
 ## Onde está cada disciplina
 
-### BD — Banco de Dados (`database/` e `docs/`)
+### BD — Banco de Dados (`sistema/schema.sql` e `docs/`)
 
-- `docs/DER.png` — **Diagrama Entidade-Relacionamento**
-- `database/schema.sql` — banco usado pelo sistema (SQLite)
-- `database/schema_mysql.sql` — **mesmo modelo em MySQL** (Workbench/phpMyAdmin), com consultas de exemplo
+- `docs/modelagem/` — **modelo conceitual, lógico e físico** (brModelo)
+- `sistema/schema.sql` — banco usado pelo sistema (SQLite)
+- `sistema/schema_mysql.sql` — **mesmo modelo em MySQL** (Workbench/phpMyAdmin), com consultas de exemplo
 - **13 tabelas** normalizadas com chave primária, estrangeira, `UNIQUE`, `CHECK`, `ON DELETE CASCADE / SET NULL` e índices
 - **Generalização/especialização**: `usuario` → `aluno` e `personal` (relacionamentos 1:1)
 - **N:N com atributos**: `treino_exercicio` (séries, repetições, carga, descanso e ordem)
@@ -91,9 +91,9 @@ o aluno escolhe com qual personal quer treinar.
 - **3 views**: `vw_matriculas_situacao` (situação e dias restantes calculados), `vw_frequencia_alunos`,
   `vw_faturamento_mensal`
 - Consultas com `JOIN`, `LEFT JOIN`, `GROUP BY`, `CASE WHEN`, subconsultas e `NOT EXISTS`
-  (em `repositories/matricula_repo.py`)
+  (em `sistema/matricula_repo.py`)
 
-### POO — Programação Orientada a Objetos em Python (`models/`, `repositories/`, `services/`)
+### POO — Programação Orientada a Objetos em Python (todos os arquivos em `sistema/`)
 
 | Conceito | Onde |
 |---|---|
@@ -106,12 +106,12 @@ o aluno escolhe com qual personal quer treinar.
 | **Métodos de classe / fábrica** | `Matricula.nova()` calcula o fim e o valor a partir do plano; `Usuario.criar()` (*Factory Method*) |
 | **Exceções personalizadas** | `exceptions.py` (`MatriculaErro`, `CheckinErro`, `PermissaoNegadaErro`...) |
 | **Camadas** | *Repository/DAO* (SQL), *Service* (regras de negócio), injeção do relógio para testes |
-| **Testes** | `sistema/tests/test_sistema.py` — 34 testes com `unittest` |
+| **Testes** | `sistema/test_sistema.py` — 34 testes com `unittest` |
 
 ```
-Navegador ──► app.py (rotas Flask) ──► services/ (regras) ──► repositories/ (SQL) ──► SQLite
+Navegador ──► app.py (rotas Flask) ──► *_service.py (regras) ──► *_repo.py (SQL) ──► SQLite
                      │                        │
-               templates/ + static/      models/ (objetos)
+               templates/ + static/      classes (usuario.py, plano.py...)
 ```
 
 ### DWS — Desenvolvimento de Web Sites (`app.py`, `templates/`, `static/`)
@@ -129,17 +129,20 @@ Navegador ──► app.py (rotas Flask) ──► services/ (regras) ──► 
 
 ```
 stars-academia/
-├── sistema/               # TODO o código Python fica aqui
+├── sistema/               # TODOS os arquivos Python juntos aqui
 │   ├── app.py             # rotas do site (Flask)
 │   ├── config.py          # configurações e regras (dias para renovar, alerta de vencimento)
 │   ├── exceptions.py      # exceções do sistema
 │   ├── utils.py           # datas, moeda, telefone
 │   ├── init_db.py         # recria o banco com dados de exemplo
-│   ├── database/          # schema.sql, schema_mysql.sql, conexão e dados de exemplo
-│   ├── models/            # classes de domínio (POO)
-│   ├── repositories/      # acesso ao banco (DAO)
-│   ├── services/          # regras de negócio
-│   └── tests/             # testes automatizados
+│   ├── conexao.py         # conexão com o banco SQLite
+│   ├── seed.py            # dados de exemplo
+│   ├── schema.sql         # criação das tabelas (SQLite)
+│   ├── schema_mysql.sql   # mesmo banco em MySQL
+│   ├── entidade.py, usuario.py, plano.py, matricula.py, treino.py, academia.py   # classes (POO)
+│   ├── base.py, *_repo.py         # acesso ao banco (DAO)
+│   ├── *_service.py               # regras de negócio
+│   └── test_sistema.py            # testes automatizados
 ├── templates/             # páginas HTML (Jinja2): público, aluno/, equipe/, admin/
 ├── static/                # css, js e imagens
 ├── docs/                  # modelagem do banco

@@ -1,9 +1,9 @@
 import sqlite3
 
 from exceptions import ValidacaoErro
-from models.treino import Exercicio, GrupoMuscular, ItemTreino, Treino, TreinoRealizado
+from treino import Exercicio, GrupoMuscular, ItemTreino, Treino, TreinoRealizado
 from utils import para_data
-from repositories.base import RepositorioBase
+from base import RepositorioBase
 
 
 class GrupoMuscularRepositorio(RepositorioBase):

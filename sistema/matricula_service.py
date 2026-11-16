@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 
 import config
 from exceptions import MatriculaErro, NaoEncontradoErro, PermissaoNegadaErro
-from models.matricula import Matricula
-from models.usuario import Aluno
-from repositories import MatriculaRepositorio, PlanoRepositorio, UsuarioRepositorio
+from matricula import Matricula
+from usuario import Aluno
+from matricula_repo import MatriculaRepositorio
+from plano_repo import PlanoRepositorio
+from usuario_repo import UsuarioRepositorio
 from utils import formatar_data, para_data
 
 

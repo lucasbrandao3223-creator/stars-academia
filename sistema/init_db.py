@@ -2,8 +2,8 @@
 
 Uso:  python sistema/init_db.py   (rodando da pasta principal do projeto)
 """
-from database import BancoDeDados
-from database.seed import popular
+from conexao import BancoDeDados
+from seed import popular
 
 
 def recriar_banco(caminho=None):

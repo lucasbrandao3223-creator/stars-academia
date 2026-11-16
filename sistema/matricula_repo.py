@@ -1,7 +1,7 @@
 from datetime import timedelta
 
-from models.matricula import Checkin, Matricula
-from repositories.base import RepositorioBase
+from matricula import Checkin, Matricula
+from base import RepositorioBase
 from utils import DIAS_CURTOS, MESES_CURTOS, para_data
 
 

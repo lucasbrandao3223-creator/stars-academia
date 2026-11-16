@@ -8,16 +8,25 @@ import tempfile
 import unittest
 from datetime import date, datetime, timedelta
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from database import BancoDeDados  # noqa: E402
+from conexao import BancoDeDados  # noqa: E402
 from exceptions import CheckinErro, MatriculaErro, PermissaoNegadaErro, ValidacaoErro  # noqa: E402
-from models import (Academia, Administrador, Aluno, HorarioFuncionamento, ItemTreino,  # noqa: E402
-                    Matricula, Personal, Plano, SituacaoMatricula, Treino, Usuario)
-from models.treino import Exercicio  # noqa: E402
-from repositories import (AcademiaRepositorio, ExercicioRepositorio, MatriculaRepositorio,  # noqa: E402
-                          PlanoRepositorio, UsuarioRepositorio)
-from services import AuthService, CheckinService, GestaoService, MatriculaService, TreinoService  # noqa: E402
+from academia import Academia, HorarioFuncionamento  # noqa: E402
+from matricula import Matricula, SituacaoMatricula  # noqa: E402
+from plano import Plano  # noqa: E402
+from treino import Exercicio, ItemTreino, Treino  # noqa: E402
+from usuario import Administrador, Aluno, Personal, Usuario  # noqa: E402
+from academia_repo import AcademiaRepositorio  # noqa: E402
+from matricula_repo import MatriculaRepositorio  # noqa: E402
+from plano_repo import PlanoRepositorio  # noqa: E402
+from treino_repo import ExercicioRepositorio  # noqa: E402
+from usuario_repo import UsuarioRepositorio  # noqa: E402
+from auth_service import AuthService  # noqa: E402
+from checkin_service import CheckinService  # noqa: E402
+from gestao_service import GestaoService  # noqa: E402
+from matricula_service import MatriculaService  # noqa: E402
+from treino_service import TreinoService  # noqa: E402
 from utils import somar_meses  # noqa: E402
 
 
@@ -232,16 +241,16 @@ class TesteComBanco(unittest.TestCase):
             self.conn.commit()
 
     def test_trigger_recusa_checkin_sem_matricula_via_repositorio(self):
-        from models.matricula import Checkin
-        from repositories import CheckinRepositorio
+        from matricula import Checkin
+        from matricula_repo import CheckinRepositorio
         with self.assertRaises(ValidacaoErro):
             CheckinRepositorio(self.conn).salvar(Checkin(self.aluno.id, "2026-11-09", "10:00"))
 
     def test_frequencia_e_sequencia(self):
         self.matriculas.matricular(self.admin, self.aluno.id, self.mensal.id, "pix",
                                    data_inicio=date(2026, 11, 1))
-        from models.matricula import Checkin
-        from repositories import CheckinRepositorio
+        from matricula import Checkin
+        from matricula_repo import CheckinRepositorio
         repo = CheckinRepositorio(self.conn)
         for dia in (5, 7, 8, 9):
             repo.salvar(Checkin(self.aluno.id, date(2026, 11, dia), "18:00"))

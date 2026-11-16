@@ -1,5 +1,5 @@
-from models.plano import Plano
-from repositories.base import RepositorioBase
+from plano import Plano
+from base import RepositorioBase
 
 
 class PlanoRepositorio(RepositorioBase):

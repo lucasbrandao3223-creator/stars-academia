@@ -2,11 +2,13 @@
 from datetime import datetime, timedelta
 
 from exceptions import NaoEncontradoErro, PermissaoNegadaErro, ValidacaoErro
-from models.matricula import Checkin
-from models.treino import ItemTreino, Treino, TreinoRealizado
-from models.usuario import Aluno
-from repositories import (AcademiaRepositorio, CheckinRepositorio, ExercicioRepositorio, MatriculaRepositorio,
-                          TreinoRealizadoRepositorio, TreinoRepositorio, UsuarioRepositorio)
+from matricula import Checkin
+from treino import ItemTreino, Treino, TreinoRealizado
+from usuario import Aluno
+from academia_repo import AcademiaRepositorio
+from matricula_repo import CheckinRepositorio, MatriculaRepositorio
+from treino_repo import ExercicioRepositorio, TreinoRealizadoRepositorio, TreinoRepositorio
+from usuario_repo import UsuarioRepositorio
 
 
 class TreinoService:

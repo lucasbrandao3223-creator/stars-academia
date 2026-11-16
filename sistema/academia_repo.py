@@ -1,6 +1,6 @@
 from exceptions import NaoEncontradoErro
-from models.academia import Academia, HorarioFuncionamento
-from repositories.base import RepositorioBase
+from academia import Academia, HorarioFuncionamento
+from base import RepositorioBase
 
 
 class AcademiaRepositorio(RepositorioBase):

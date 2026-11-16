@@ -1,8 +1,8 @@
 import sqlite3
 
 from exceptions import ValidacaoErro
-from models.usuario import Usuario
-from repositories.base import RepositorioBase
+from usuario import Usuario
+from base import RepositorioBase
 
 
 class UsuarioRepositorio(RepositorioBase):

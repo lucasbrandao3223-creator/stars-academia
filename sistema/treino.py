@@ -1,6 +1,6 @@
 """Biblioteca de exercícios e fichas de treino."""
 from exceptions import ValidacaoErro
-from models.entidade import Entidade
+from entidade import Entidade
 
 
 class GrupoMuscular(Entidade):

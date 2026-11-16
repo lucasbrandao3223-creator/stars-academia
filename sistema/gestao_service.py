@@ -3,13 +3,15 @@ from datetime import datetime
 
 import config
 from exceptions import NaoEncontradoErro, PermissaoNegadaErro, ValidacaoErro
-from models.academia import HorarioFuncionamento
-from models.plano import Plano
-from models.treino import Exercicio
-from models.usuario import Aluno, Personal
-from repositories import (AcademiaRepositorio, CheckinRepositorio, ExercicioRepositorio,
-                          GrupoMuscularRepositorio, MatriculaRepositorio, PlanoRepositorio,
-                          TreinoRepositorio, UsuarioRepositorio)
+from academia import HorarioFuncionamento
+from plano import Plano
+from treino import Exercicio
+from usuario import Aluno, Personal
+from academia_repo import AcademiaRepositorio
+from matricula_repo import CheckinRepositorio, MatriculaRepositorio
+from plano_repo import PlanoRepositorio
+from treino_repo import ExercicioRepositorio, GrupoMuscularRepositorio, TreinoRepositorio
+from usuario_repo import UsuarioRepositorio
 from utils import apenas_digitos
 
 

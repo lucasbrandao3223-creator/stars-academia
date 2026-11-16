@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from enum import Enum
 
 from exceptions import MatriculaErro, ValidacaoErro
-from models.entidade import Entidade
+from entidade import Entidade
 from utils import formatar_moeda, formatar_telefone, hora_str, para_data, para_hora, somar_meses
 
 

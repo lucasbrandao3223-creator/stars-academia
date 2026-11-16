@@ -8,13 +8,18 @@ from functools import wraps
 from flask import Flask, flash, g, jsonify, redirect, render_template, request, session, url_for
 
 import config
-from database import BancoDeDados
+from conexao import BancoDeDados
 from exceptions import AcademiaErro, NaoEncontradoErro, PermissaoNegadaErro
-from models.matricula import FormaPagamento, SituacaoMatricula
-from models.usuario import Aluno
-from repositories import (AcademiaRepositorio, ExercicioRepositorio, GrupoMuscularRepositorio,
-                          UsuarioRepositorio)
-from services import AuthService, CheckinService, GestaoService, MatriculaService, TreinoService
+from matricula import FormaPagamento, SituacaoMatricula
+from usuario import Aluno
+from academia_repo import AcademiaRepositorio
+from treino_repo import ExercicioRepositorio, GrupoMuscularRepositorio
+from usuario_repo import UsuarioRepositorio
+from auth_service import AuthService
+from checkin_service import CheckinService
+from gestao_service import GestaoService
+from matricula_service import MatriculaService
+from treino_service import TreinoService
 from utils import DIAS_SEMANA, formatar_data, formatar_moeda, formatar_telefone, hora_str, para_data
 
 # templates e static ficam fora da pasta "sistema" (na pasta principal do projeto)

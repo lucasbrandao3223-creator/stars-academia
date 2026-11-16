@@ -7,14 +7,16 @@ fichas de treino montadas pelos personais.
 import random
 from datetime import date, datetime, time, timedelta
 
-from models.academia import Academia, HorarioFuncionamento
-from models.matricula import Checkin, Matricula
-from models.plano import Plano
-from models.treino import Exercicio, ItemTreino, Treino, TreinoRealizado
-from models.usuario import Administrador, Aluno, Personal
-from repositories import (AcademiaRepositorio, CheckinRepositorio, ExercicioRepositorio,
-                          MatriculaRepositorio, PlanoRepositorio, TreinoRealizadoRepositorio, TreinoRepositorio,
-                          UsuarioRepositorio)
+from academia import Academia, HorarioFuncionamento
+from matricula import Checkin, Matricula
+from plano import Plano
+from treino import Exercicio, ItemTreino, Treino, TreinoRealizado
+from usuario import Administrador, Aluno, Personal
+from academia_repo import AcademiaRepositorio
+from matricula_repo import CheckinRepositorio, MatriculaRepositorio
+from plano_repo import PlanoRepositorio
+from treino_repo import ExercicioRepositorio, TreinoRealizadoRepositorio, TreinoRepositorio
+from usuario_repo import UsuarioRepositorio
 from utils import somar_meses
 
 SENHA_PADRAO = "123456"

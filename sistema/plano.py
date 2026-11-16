@@ -1,6 +1,6 @@
 """Plano de assinatura da academia."""
 from exceptions import ValidacaoErro
-from models.entidade import Entidade
+from entidade import Entidade
 from utils import formatar_moeda
 
 
